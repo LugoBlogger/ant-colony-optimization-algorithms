@@ -208,7 +208,7 @@ def visualize(variables):
 
             time_spend_avg = np.zeros(len(m_arr))
             for j, m_arr_i in enumerate(m_arr):
-                print("m_arr_i:", m_arr_i)
+                print("m:", m_arr_i)
                 
                 iter_arr = np.zeros(N_experiment, dtype=int)
                 dist_arr = np.zeros(N_experiment, dtype=int)
