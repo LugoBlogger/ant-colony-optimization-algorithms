@@ -191,7 +191,7 @@ def visualize(variables):
             ax.plot(x_experiment, dist_arr)
             ax.set_xlabel("Experiment #-th")
             ax.set_ylabel("local optimal solution")
-            ax.set_title("ACO: m={:d}, beta={:g}, n={:d}, rho={:g}".format(m, beta, n, rho)
+            ax.set_title("{:s}: m={:d}, beta={:g}, n={:d}, rho={:g}".format(algo, m, beta, n, rho)
                          + "\nglobal_opt_sol = {:d}  ({:2g}%)".format(int(dist_arr.min()),
                                                                      N_count_best/float(N_experiment) * 100))
             plt.tight_layout()
@@ -232,7 +232,7 @@ def visualize(variables):
                 
             ax[0].set_xlabel("experiment #-th")
             ax[0].set_ylabel("local optimal solution")
-            ax[0].set_title("ACO: beta={:g}, n={:d}, rho={:g}".format(beta, n, rho))
+            ax[0].set_title("{:s}: beta={:g}, n={:d}, rho={:g}".format(algo, beta, n, rho))
             ax[0].legend(loc='upper left', bbox_to_anchor=[1.01, 1], borderaxespad=0, frameon=False)
 
 
