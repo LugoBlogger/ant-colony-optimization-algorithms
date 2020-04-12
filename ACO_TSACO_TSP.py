@@ -5,8 +5,15 @@
 # __email__: lugoblogger@gmail.com
 #-----------------------------------
 # Usage:
+# plot 1 with ACO algorithm
 # $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p1 1 -algo 'ACO'
+#  
+# plot 2 with TSACO algorithm
+# $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p2 1 -algo 'TSACO'
 # 
+# plot 3
+# $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p3 1
+#
 # Type the following to see all the description in the arguments
 # $ python ACO_TSACO -h
 #
@@ -116,7 +123,7 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo):
             max_Iter = ell + 1
             break
 
-    return max_Iter, best_distance
+    return max_Iter, best_distance, best_Tour[0]
 
 
 def single_experiment(variables):
@@ -130,7 +137,8 @@ def single_experiment(variables):
 
 
     start_time = time.perf_counter()
-    iteration, dist_min = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo)
+    iteration, dist_min, best_Tour = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo)
+    print("\nBest tour:", best_Tour)
     print("\nApproximated computational time: {:.4g} s".format(time.perf_counter() - start_time))
 
     return None
@@ -163,12 +171,19 @@ def visualize(variables):
 
             iter_arr = np.zeros(N_experiment, dtype=int)
             dist_arr = np.zeros(N_experiment, dtype=int)
+            tour_arr = np.zeros((N_experiment, n+1), dtype=int)
+            delta_avg = 0.
             for i in range(N_experiment):
-                iter_arr[i], dist_arr[i] = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo)
+                delta = time.perf_counter()
+                iter_arr[i], dist_arr[i], tour_arr[i,:] = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo)
+                delta = time.perf_counter() - delta
+                delta_avg += delta
 
             N_count_best = np.sum(dist_arr.min() == dist_arr)
             print("\nGlobal distance minimum:", dist_arr.min())
+            print("Global best tour:", tour_arr[dist_arr.argmin(),:])
             print("Ratio:", N_count_best/float(N_experiment))
+            print("Average computation on each experiment: {:4g} s".format(delta_avg/N_experiment)) 
 
 
             fig, ax = plt.subplots(dpi=100)
@@ -197,17 +212,20 @@ def visualize(variables):
                 
                 iter_arr = np.zeros(N_experiment, dtype=int)
                 dist_arr = np.zeros(N_experiment, dtype=int)
+                tour_arr = np.zeros((N_experiment, n+1), dtype=int)
                 delta_avg = 0
                 for i in range(N_experiment):
                     delta = time.perf_counter()
-                    iter_arr[i], dist_arr[i] = TSP_solver(G_dense, beta, rho, m_arr_i, N_max_iter, algo)
+                    iter_arr[i], dist_arr[i], tour_arr[i,:] = TSP_solver(G_dense, beta, rho, m_arr_i, N_max_iter, algo)
                     delta = time.perf_counter() - delta
                     delta_avg += delta
                     
                 time_spend_avg[j] = delta_avg/N_experiment
                 N_count_best = np.sum(dist_arr.min() == dist_arr)
                 print("\nGlobal distance minimum:", dist_arr.min())
-                print("Ratio: {:2g}\n".format(N_count_best/float(N_experiment)))
+                print("Global best tour:", tour_arr[dist_arr.argmin(),:])
+                print("Ratio: {:2g}".format(N_count_best/float(N_experiment)))
+                print("Average computation on each experiment: {:4g} s\n".format(delta_avg/N_experiment)) 
 
                 x_experiment = np.arange(1, N_experiment+1, dtype=int)
                 ax[0].plot(x_experiment, dist_arr, alpha=1. - 0.2*j, label="m={:d}".format(m_arr_i))
@@ -236,25 +254,29 @@ def visualize(variables):
             
             y_iter_ACO = np.zeros(N_experiment, dtype=int)
             dist_min_ACO = np.zeros(N_experiment, dtype=int)
-
+            tour_arr_ACO = np.zeros((N_experiment, n+1), dtype=int)
+            
             y_iter_TSACO = np.zeros(N_experiment, dtype=int)
             dist_min_TSACO = np.zeros(N_experiment, dtype=int)
+            tour_arr_TSACO = np.zeros((N_experiment, n+1), dtype=int)
 
-            start_compute = time.time()
+            start_compute = time.perf_counter()
             print("ACO: ")
             for i in range(N_experiment):
-                y_iter_ACO[i], dist_min_ACO[i] = TSP_solver(G_dense, beta, rho, m, N_max_iter, 'ACO')
+                y_iter_ACO[i], dist_min_ACO[i], tour_arr_ACO[i,:] = TSP_solver(G_dense, beta, rho, m, N_max_iter, 'ACO')
             N_count_best_ACO = np.sum(dist_min_ACO.min() == dist_min_ACO)
             print("\n   Global best dist:", dist_min_ACO.min())
+            print("Global best tour:", tour_arr_ACO[dist_min_ACO.argmin(),:])
+            print("Approximation computational time: {:.4g} s".format(time.perf_counter() - start_compute))
 
-
+            start_compute = time.perf_counter()
             print("\nTSACO: ")
             for i in range(N_experiment):
-                y_iter_TSACO[i], dist_min_TSACO[i] = TSP_solver(G_dense, beta, rho, m, N_max_iter, 'TSACO')
+                y_iter_TSACO[i], dist_min_TSACO[i], tour_arr_TSACO[i,:] = TSP_solver(G_dense, beta, rho, m, N_max_iter, 'TSACO')
             N_count_best_TSACO = np.sum(dist_min_TSACO.min() == dist_min_TSACO)
             print("\n   Global best dist:", dist_min_TSACO.min())
-
-            print("\nApproximation computational time: {:.4g} s".format(time.time() - start_compute))
+            print("Global best tour:", tour_arr_TSACO[dist_min_TSACO.argmin(),:])
+            print("Approximation computational time: {:.4g} s".format(time.perf_counter() - start_compute))
 
 
             fig, ax = plt.subplots(dpi=100, figsize=(13,6))
