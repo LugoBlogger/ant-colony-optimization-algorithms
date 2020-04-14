@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 
 
-def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo):
+def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=False):
 
     n = len(G_dense)
 
@@ -81,12 +81,15 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo):
             cum_p_k = [ [p[:i].sum() for i in range(len(p) + 1)] for p in p_k]
             cum_p_k = [ [[cum_p[i], cum_p[i+1]] for i in range(len(cum_p) - 1)]
                        for cum_p in cum_p_k]
-
         
+
         distance_k = np.array([ np.array([G_dense[Tour_k[k, i] , Tour_k[k, i+1]]
                                           for i in range(n)]).sum()
                                for k in range(m)])
 
+        if verbose:
+            print_tour(Tour_k)
+        
         sys.stdout.write('\riteration: {:6d}, dist_min: {:5d}'.format(ell+1, distance_k.min()))
         sys.stdout.flush()
 
@@ -126,6 +129,16 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo):
     return max_Iter, best_distance, best_Tour[0]
 
 
+def print_tour(Tour_k):
+    Tour = Tour_k.copy()
+    print("\n\nTour_k")
+    for k, Tour_k in enumerate(Tour):
+        print("Ant {:d}: {:}".format(k, Tour_k))
+
+
+    return None
+
+
 def single_experiment(variables):
 
     G_dense = variables[0]
@@ -137,7 +150,7 @@ def single_experiment(variables):
 
 
     start_time = time.perf_counter()
-    iteration, dist_min, best_Tour = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo)
+    iteration, dist_min, best_Tour = TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=True)
     print("\nBest tour:", best_Tour)
     print("\nApproximated computational time: {:.4g} s".format(time.perf_counter() - start_time))
 
@@ -399,9 +412,11 @@ if __name__ == '__main__':
     args = read_input()
     #print_args(args)
 
-    variables = to_variable(args)
-
-    #single_experiment(variables)
-    
-    visualize(variables)
-
+    if len(sys.argv[1:]) == 10:
+        variables = to_variable(args)
+        single_experiment(variables)
+    elif len(sys.argv[1:]) > 10:
+        variables = to_variable(args)
+        visualize(variables)
+    else:
+        print("Please provide with sufficient number of arguments")
