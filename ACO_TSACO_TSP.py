@@ -5,17 +5,20 @@
 # __email__: lugoblogger@gmail.com
 #-----------------------------------
 # Usage:
+# single experiment
+# $ python ACO_TSACO_TSP.py -i "tsp_case.csv" -m 4 -b 2 -r -0.5 -algo 'TSACO'
+#
 # plot 1 with ACO algorithm
-# $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p1 1 -algo 'ACO'
+# $ python ACO_TSACO_TSP.py -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p1 1 -algo 'ACO'
 #  
 # plot 2 with TSACO algorithm
-# $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p2 1 -algo 'TSACO'
+# $ python ACO_TSACO_TSP.py -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p2 1 -algo 'TSACO'
 # 
 # plot 3
-# $ python ACO_TSACO -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p3 1
+# $ python ACO_TSACO_TSP.py -i "tsp_case.csv" -m 4 -b 2 -r 0.5 -N 100 -p3 1
 #
 # Type the following to see all the description in the arguments
-# $ python ACO_TSACO -h
+# $ python ACO_TSACO_TSP.py -h
 #
 #----------------------------------
 
