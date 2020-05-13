@@ -14,4 +14,4 @@ Singiresu S. Rao - Engineering Optimization - Theory and Practice (2009, Wiley),
 ## Things to do
 - implement a class for ant
 - fully support on reading .tsp files (full matrix, lower diagonal matrix, and node coordinate)
-- add more fancy visualization (of course, :D)
+- add more fancy visualizations (of course, :smile:)
