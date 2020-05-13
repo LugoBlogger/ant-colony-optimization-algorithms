@@ -334,7 +334,7 @@ def to_variable(args):
         read_data = f.readlines()
 
     G_dense = [line.strip('\n') for line in read_data]
-    G_dense = [line.split(',') for line in G_dense]
+    G_dense = [line.split(',') for line in G_dense if line is not '']
     G_dense = [[int(r.strip()) for r in row] for row in G_dense]
    
     if input_file[-7:-4] == 'ldm':    # .csv only provided lower diagonal matrix
