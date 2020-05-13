@@ -20,6 +20,9 @@
 # Type the following to see all the description in the arguments
 # $ python ACO_TSACO_TSP.py -h
 #
+# when we provide with lower diagonal matrix for distance matrix
+# put _ldm in the end of its name file
+#
 #----------------------------------
 
 import numpy as np
@@ -333,7 +336,15 @@ def to_variable(args):
     G_dense = [line.strip('\n') for line in read_data]
     G_dense = [line.split(',') for line in G_dense]
     G_dense = [[int(r.strip()) for r in row] for row in G_dense]
+   
+    if input_file[-7:-4] == 'ldm':    # .csv only provided lower diagonal matrix
+        G_dense_size = len(G_dense)
+        G_dense_low = np.array([row + [0]*(G_dense_size - len(row)) for row in G_dense])
+        G_dense_up = np.array([list(x) for x in zip(*G_dense_low)])
+        G_dense = G_dense_low + G_dense_up
+
     G_dense = np.array(G_dense)
+    print(G_dense)
 
     m = args.m
     beta = args.beta
