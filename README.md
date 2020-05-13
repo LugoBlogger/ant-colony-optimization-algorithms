@@ -10,3 +10,8 @@ Singiresu S. Rao - Engineering Optimization - Theory and Practice (2009, Wiley),
    - *Ant Colony System: A Cooperative Learning Approach to the Traveling Salesman Problem* by M. Dorigo and L. M. Gambardella.
    - *Ant Colony Optimization* by M. Dorigo and T. Stützle.
    - *ANTabu &ndash; enhanced version LIL-99-1* by O. Roux, C. Fonlupt, E.-G. Talbi, and D. Robilliard.
+
+## Things to do
+- implement a class for ant
+- fully support on reading .tsp files
+- add more fancy visualization (of course, :D)
