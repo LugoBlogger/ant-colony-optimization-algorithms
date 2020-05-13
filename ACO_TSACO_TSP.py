@@ -50,6 +50,7 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=False):
     max_Iter = 0
 
     for ell in range(N_max_iter):
+        start_compute = time.perf_counter()
         Tour_k = np.zeros((m, n+1), dtype=int)
 
         N_cities = np.arange(n, dtype=int)
@@ -82,7 +83,25 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=False):
 
             p_k = np.array([ [tau[visited_city[k], s] * mu[visited_city[k], s]**beta
                               for s in M_k[k]] for k in range(m)])
-            p_k = [p/p.sum() for p in p_k]
+            #print("\np_k:", p_k)
+            #print("p_sum:", [p.sum() for p in p_k])            
+            # This division can be a problem when p is so small and p_sum is also small
+            #p_k = [p/p.sum() for p in p_k]            # the previous code
+            
+            p_k_temp = np.zeros_like(p_k) 
+            for k, p in enumerate(p_k):
+                if abs(p.max() - p.sum()) < 1e-16:
+                    p_temp = np.zeros_like(p)
+                    p_temp[abs(p - p.max()) < 1e-16] = 1.
+                else:
+                    p_temp = p/p.sum()
+
+                p_k_temp[k] = p_temp 
+
+            p_k = p_k_temp.copy()
+
+            #p_k = [p/p.sum() if p.min() > 1e-16 and p.sum() > 1e-16 else np.ones_like(p)  for p in p_k]
+            #print("p_k_2:", p_k) 
 
             cum_p_k = [ [p[:i].sum() for i in range(len(p) + 1)] for p in p_k]
             cum_p_k = [ [[cum_p[i], cum_p[i+1]] for i in range(len(cum_p) - 1)]
@@ -123,8 +142,11 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=False):
         elif algo == 'TSACO':
             for Tour, distance in zip(Tour_k, distance_k):
                 for i in range(n):
+                    # This line need to scale if you work with many cities and the total distance is big enough
                     tau0[Tour[i], Tour[i+1]] += (rho/distance) * (worst_distance - distance)/float(best_distance)
                     tau0[Tour[i+1], Tour[i]] += tau0[Tour[i], Tour[i+1]]         
+            #print("\tau0:", tau0)
+        
         else:
             print("Please set ACO or TSACO in -algo.")
 
@@ -132,6 +154,10 @@ def TSP_solver(G_dense, beta, rho, m, N_max_iter, algo, verbose=False):
             max_Iter = ell + 1
             break
 
+
+        print("time per iteration: {:.2f} s".format(time.perf_counter() - start_compute))
+    
+    
     return max_Iter, best_distance, best_Tour[0]
 
 
@@ -334,11 +360,23 @@ def to_variable(args):
         read_data = f.readlines()
 
     G_dense = [line.strip('\n') for line in read_data]
-    G_dense = [line.split(',') for line in G_dense if line is not '']
+    G_dense = [line.split(',') for line in G_dense]
     G_dense = [[int(r.strip()) for r in row] for row in G_dense]
    
     if input_file[-7:-4] == 'ldm':    # .csv only provided lower diagonal matrix
         G_dense_size = len(G_dense)
+        G_dense_low = np.array([row + [0]*(G_dense_size - len(row)) for row in G_dense])
+        G_dense_up = np.array([list(x) for x in zip(*G_dense_low)])
+        G_dense = G_dense_low + G_dense_up
+
+    elif input_file[-8:-4] == 'coor':
+        G_dense_size = len(G_dense)
+        euler2D = lambda x1, y1, x2, y2: np.sqrt((x1-x2)*(x1-x2) + (y1-y2)*(y1-y2))
+
+        G_dense = [[int(round(euler2D(G_dense[j][1], G_dense[j][2], G_dense[i][1], G_dense[i][2])))
+                    for i in range(j)] + [0]
+                        for j in range(G_dense_size)]
+
         G_dense_low = np.array([row + [0]*(G_dense_size - len(row)) for row in G_dense])
         G_dense_up = np.array([list(x) for x in zip(*G_dense_low)])
         G_dense = G_dense_low + G_dense_up
@@ -370,9 +408,14 @@ def read_input():
         dest='beta')
     parser.add_argument('-r', type=float,
         default=0.5, help='Pheromone evaporation rate', dest='rho')
+
+    # sometimes we need to change the default value of N_max_iter 
+    # for single experiment and big cities (G_dense_size > 50)
     parser.add_argument('-N', type=int,
         default=100, help='Maximum number of cycle of ants route',
         dest='N_max_iter')
+ 
+    
     parser.add_argument('-p1', type=bool,
         default=False, help='Make a plot of local optimal solution\
                 in 100 experiments', dest='plot1')
