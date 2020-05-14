@@ -7,7 +7,7 @@ def add_comma(input_file, output_file):
 
     xy_coor = [line.strip('\n') for line in data]
     xy_coor = [line.lstrip().rstrip() for line in xy_coor]
-    xy_coor = [line.split(' ') for line in xy_coor]
+    xy_coor = [line.split() for line in xy_coor]
     xy_coor = [[r.strip() for r in line] for line in xy_coor]
     xy_coor = [', '.join(line) for line in xy_coor]
 
